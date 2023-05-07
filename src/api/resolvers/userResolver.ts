@@ -1,28 +1,21 @@
+import axios from 'axios';
 import {GraphQLError} from 'graphql';
 import {User, UserIdWithToken} from '../../interfaces/User';
-import LoginMessageResponse from '../../interfaces/LoginMessageResponse';
+import LoginMessageResponse from '../../interfaces/MessageResponse';
 
 export default {
   Query: {
     users: async () => {
-      const response = await fetch(`${process.env.AUTH_URL}/users`);
-      if (!response.ok) {
-        throw new GraphQLError(response.statusText, {
-          extensions: {code: 'NOT_FOUND'},
-        });
-      }
-      const users = (await response.json()) as User[];
+      const response = await axios.get(`${process.env.AUTH_URL}/users`);
+      const users = response.data as User[];
       return users;
     },
 
     userById: async (_parent: unknown, args: {id: string}) => {
-      const response = await fetch(`${process.env.AUTH_URL}/users/${args.id}`);
-      if (!response.ok) {
-        throw new GraphQLError(response.statusText, {
-          extensions: {code: 'NOT_FOUND'},
-        });
-      }
-      const user = (await response.json()) as User;
+      const response = await axios.get(
+        `${process.env.AUTH_URL}/users/${args.id}`
+      );
+      const user = response.data as User;
       return user;
     },
 
@@ -31,17 +24,12 @@ export default {
       _args: unknown,
       user: UserIdWithToken
     ) => {
-      const response = await fetch(`${process.env.AUTH_URL}/users/token`, {
+      const response = await axios.get(`${process.env.AUTH_URL}/users/token`, {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
       });
-      if (!response.ok) {
-        throw new GraphQLError(response.statusText, {
-          extensions: {code: 'NOT_FOUND'},
-        });
-      }
-      const userFromAuth = await response.json();
+      const userFromAuth = response.data;
       return userFromAuth;
     },
   },
@@ -51,36 +39,20 @@ export default {
       _parent: unknown,
       args: {credentials: {username: string; password: string}}
     ) => {
-      const response = await fetch(`${process.env.AUTH_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(args.credentials),
-      });
-      if (!response.ok) {
-        throw new GraphQLError(response.statusText, {
-          extensions: {code: 'NOT_FOUND'},
-        });
-      }
-      const user = (await response.json()) as LoginMessageResponse;
+      const response = await axios.post(
+        `${process.env.AUTH_URL}/auth/login`,
+        args.credentials
+      );
+      const user = response.data as LoginMessageResponse;
       return user;
     },
 
     register: async (_parent: unknown, args: {user: User}) => {
-      const response = await fetch(`${process.env.AUTH_URL}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(args.user),
-      });
-      if (!response.ok) {
-        throw new GraphQLError(response.statusText, {
-          extensions: {code: 'VALIDATION_ERROR'},
-        });
-      }
-      const user = (await response.json()) as LoginMessageResponse;
+      const response = await axios.post(
+        `${process.env.AUTH_URL}/auth/register`,
+        args.user
+      );
+      const user = response.data as LoginMessageResponse;
       return user;
     },
 
@@ -101,20 +73,16 @@ export default {
         });
       }
 
-      const response = await fetch(`${process.env.AUTH_URL}/users`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: JSON.stringify(args.user),
-      });
-      if (!response.ok) {
-        throw new GraphQLError(response.statusText, {
-          extensions: {code: 'NOT_FOUND'},
-        });
-      }
-      const userFromPost = (await response.json()) as LoginMessageResponse;
+      const response = await axios.post(
+        `${process.env.AUTH_URL}/users`,
+        args.user,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
+      const userFromPost = response.data as LoginMessageResponse;
       return userFromPost;
     },
 
@@ -129,20 +97,16 @@ export default {
         });
       }
 
-      const response = await fetch(`${process.env.AUTH_URL}/users`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: JSON.stringify(args.user),
-      });
-      if (!response.ok) {
-        throw new GraphQLError(response.statusText, {
-          extensions: {code: 'NOT_FOUND'},
-        });
-      }
-      const userFromPut = (await response.json()) as LoginMessageResponse;
+      const response = await axios.put(
+        `${process.env.AUTH_URL}/users`,
+        args.user,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
+      const userFromPut = response.data as LoginMessageResponse;
       return userFromPut;
     },
 
@@ -157,19 +121,12 @@ export default {
         });
       }
 
-      const response = await fetch(`${process.env.AUTH_URL}/users`, {
-        method: 'DELETE',
+      const response = await axios.delete(`${process.env.AUTH_URL}/users`, {
         headers: {
-          'Content-Type': 'application/json',
           Authorization: `Bearer ${user.token}`,
         },
       });
-      if (!response.ok) {
-        throw new GraphQLError(response.statusText, {
-          extensions: {code: 'NOT_FOUND'},
-        });
-      }
-      const userFromDelete = (await response.json()) as LoginMessageResponse;
+      const userFromDelete = response.data as LoginMessageResponse;
       return userFromDelete;
     },
 
@@ -183,27 +140,22 @@ export default {
           extensions: {code: 'NOT_AUTHORIZED'},
         });
       }
-
       if (user.isAdmin === false) {
         throw new GraphQLError('Not authorized', {
           extensions: {code: 'NOT_AUTHORIZED'},
         });
       }
 
-      const response = await fetch(`${process.env.AUTH_URL}/users/${args.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: JSON.stringify(args.user),
-      });
-      if (!response.ok) {
-        throw new GraphQLError(response.statusText, {
-          extensions: {code: 'NOT_FOUND'},
-        });
-      }
-      const userFromPut = (await response.json()) as LoginMessageResponse;
+      const response = await axios.put(
+        `${process.env.AUTH_URL}/users/${args.id}`,
+        args.user,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
+      const userFromPut = response.data as LoginMessageResponse;
       return userFromPut;
     },
 
@@ -224,19 +176,15 @@ export default {
         });
       }
 
-      const response = await fetch(`${process.env.AUTH_URL}/users/${args.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`,
-        },
-      });
-      if (!response.ok) {
-        throw new GraphQLError(response.statusText, {
-          extensions: {code: 'NOT_FOUND'},
-        });
-      }
-      const userFromDelete = (await response.json()) as LoginMessageResponse;
+      const response = await axios.delete(
+        `${process.env.AUTH_URL}/users/${args.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
+      const userFromDelete = response.data as LoginMessageResponse;
       return userFromDelete;
     },
   },
