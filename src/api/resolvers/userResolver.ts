@@ -7,7 +7,7 @@ export default {
     users: async () => {
       const response = await fetch(`${process.env.AUTH_URL}/users`);
       if (!response.ok) {
-        throw new GraphQLError(response.statusText, {
+        throw new GraphQLError(response.statusText + 'siema', {
           extensions: {code: 'NOT_FOUND'},
         });
       }
