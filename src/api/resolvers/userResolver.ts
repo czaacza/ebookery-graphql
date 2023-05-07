@@ -1,16 +1,12 @@
 import {GraphQLError} from 'graphql';
 import {User, UserIdWithToken} from '../../interfaces/User';
 import LoginMessageResponse from '../../interfaces/LoginMessageResponse';
-
-async function fetchWrapper(url: any, options?: any) {
-  const {default: fetch} = await import('node-fetch');
-  return fetch(url, options);
-}
+const fetch = require('node-fetch');
 
 export default {
   Query: {
     users: async () => {
-      const response = await fetchWrapper(`${process.env.AUTH_URL}/users`);
+      const response = await fetch(`${process.env.AUTH_URL}/users`);
       if (!response.ok) {
         throw new GraphQLError(response.statusText, {
           extensions: {code: 'NOT_FOUND'},
@@ -21,9 +17,7 @@ export default {
     },
 
     userById: async (_parent: unknown, args: {id: string}) => {
-      const response = await fetchWrapper(
-        `${process.env.AUTH_URL}/users/${args.id}`
-      );
+      const response = await fetch(`${process.env.AUTH_URL}/users/${args.id}`);
       if (!response.ok) {
         throw new GraphQLError(response.statusText, {
           extensions: {code: 'NOT_FOUND'},
@@ -38,14 +32,11 @@ export default {
       _args: unknown,
       user: UserIdWithToken
     ) => {
-      const response = await fetchWrapper(
-        `${process.env.AUTH_URL}/users/token`,
-        {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        }
-      );
+      const response = await fetch(`${process.env.AUTH_URL}/users/token`, {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
       if (!response.ok) {
         throw new GraphQLError(response.statusText, {
           extensions: {code: 'NOT_FOUND'},
@@ -61,16 +52,13 @@ export default {
       _parent: unknown,
       args: {credentials: {username: string; password: string}}
     ) => {
-      const response = await fetchWrapper(
-        `${process.env.AUTH_URL}/auth/login`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(args.credentials),
-        }
-      );
+      const response = await fetch(`${process.env.AUTH_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(args.credentials),
+      });
       if (!response.ok) {
         throw new GraphQLError(response.statusText, {
           extensions: {code: 'NOT_FOUND'},
@@ -81,16 +69,13 @@ export default {
     },
 
     register: async (_parent: unknown, args: {user: User}) => {
-      const response = await fetchWrapper(
-        `${process.env.AUTH_URL}/auth/register`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(args.user),
-        }
-      );
+      const response = await fetch(`${process.env.AUTH_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(args.user),
+      });
       if (!response.ok) {
         throw new GraphQLError(response.statusText, {
           extensions: {code: 'VALIDATION_ERROR'},
@@ -117,7 +102,7 @@ export default {
         });
       }
 
-      const response = await fetchWrapper(`${process.env.AUTH_URL}/users`, {
+      const response = await fetch(`${process.env.AUTH_URL}/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -145,7 +130,7 @@ export default {
         });
       }
 
-      const response = await fetchWrapper(`${process.env.AUTH_URL}/users`, {
+      const response = await fetch(`${process.env.AUTH_URL}/users`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -173,7 +158,7 @@ export default {
         });
       }
 
-      const response = await fetchWrapper(`${process.env.AUTH_URL}/users`, {
+      const response = await fetch(`${process.env.AUTH_URL}/users`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -206,17 +191,14 @@ export default {
         });
       }
 
-      const response = await fetchWrapper(
-        `${process.env.AUTH_URL}/users/${args.id}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${user.token}`,
-          },
-          body: JSON.stringify(args.user),
-        }
-      );
+      const response = await fetch(`${process.env.AUTH_URL}/users/${args.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify(args.user),
+      });
       if (!response.ok) {
         throw new GraphQLError(response.statusText, {
           extensions: {code: 'NOT_FOUND'},
@@ -243,16 +225,13 @@ export default {
         });
       }
 
-      const response = await fetchWrapper(
-        `${process.env.AUTH_URL}/users/${args.id}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${user.token}`,
-          },
-        }
-      );
+      const response = await fetch(`${process.env.AUTH_URL}/users/${args.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
       if (!response.ok) {
         throw new GraphQLError(response.statusText, {
           extensions: {code: 'NOT_FOUND'},
