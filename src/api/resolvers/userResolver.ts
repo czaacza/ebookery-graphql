@@ -1,7 +1,6 @@
 import {GraphQLError} from 'graphql';
 import {User, UserIdWithToken} from '../../interfaces/User';
 import LoginMessageResponse from '../../interfaces/LoginMessageResponse';
-const fetch = require('node-fetch');
 
 export default {
   Query: {
